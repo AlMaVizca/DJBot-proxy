@@ -1,0 +1,37 @@
+#!/usr/bin/expect -f
+#
+# creates a new key/cert pair with openssl and signs it with a local CA
+#
+# expects /etc/ssl/openssl.cnf to provide correct defaults to everything
+# except the CN. Easily modifyable to handle more parameters.
+#
+# usage: ./newcert.key CN capass
+#
+#  * CN: the name of your website, eg example.com
+#  * capass: the password of your CA key
+#
+# output: newkey.nopass.pem (password-less), newcert.pem
+
+set timeout -1
+
+
+
+spawn openssl genrsa -out djbot.local.key 2048
+expect eof
+
+spawn openssl req -new -key djbot.local.key -out djbot.local.csr
+expect -re {Country Name \(2 letter code\) [^:]*:} {send "\n"}
+expect -re {State or Province Name \(full name\) [^:]*:} {send "\n"}
+expect -re {Locality Name \(eg, city\) [^:]*:} {send "\n"}
+expect -re {Organization Name \(eg, company\) [^:]*:} {send "\n"}
+expect -re {Organizational Unit Name \(eg, section\) [^:]*:} {send "\n"}
+expect -re {Common Name \(e.g. server FQDN or YOUR name\) [^:]*:} {send "djbot.local\n"}
+expect -re {Email Address [^:]*:} {send "\n"}
+expect -re {A challenge password [^:]*:} {send "\n"}
+expect -re {An optional company name [^:]*:} {send "\n"}
+expect eof
+
+
+
+spawn openssl x509 -req -days 512 -in djbot.local.csr -signkey djbot.local.key -out djbot.local.crt
+expect eof
