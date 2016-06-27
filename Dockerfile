@@ -8,10 +8,9 @@ RUN mkdir -p /etc/nginx/certs /etc/nginx/conf.d
 
 WORKDIR /etc/nginx/certs
 ADD newcert  /etc/nginx/certs/
-RUN expect -f ./newcert
-
-RUN apt-get remove -qq --purge expect openssl\ 
- && apt-get clean \	
+ADD create_cert  /usr/local/bin
+RUN chmod 755 /usr/local/bin/create_cert
+RUN apt-get clean \	
  && rm -r /var/lib/apt/lists/*	
 
 
